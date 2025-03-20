@@ -140,13 +140,19 @@ DimHeatmap(NMU_O_P, dims = 1:15, cells = 500, balanced = TRUE)
 ### approximate techniques such as those implemented in ElbowPlot() can be used to reduce
 ### computation time
 NMU_O_D <- JackStraw(NMU_O_D, num.replicate = 100,dims = 30)
+
 NMU_O_D <- ScoreJackStraw(NMU_O_D, dims = 1:30)
+
 JackStrawPlot(NMU_O_D, dims = 1:30)
+
 ElbowPlot(NMU_O_D, ndims = 30)
 
 NMU_O_P <- JackStraw(NMU_O_P, num.replicate = 100,dims = 30)
+
 NMU_O_P <- ScoreJackStraw(NMU_O_P, dims = 1:30)
+
 JackStrawPlot(NMU_O_P, dims = 1:30)
+
 ElbowPlot(NMU_O_P, ndims = 30)
 
 # Run non-linear dimensional reduction (UMAP/tSNE)
@@ -178,7 +184,7 @@ DimPlot(NMU_O_P, group.by = "Phase", reduction = "umap")
 # Doublet estimation 
 library(DoubletFinder)
 
-### DoubletFinder can be broken up into 4 steps:
+## DoubletFinder can be broken up into 4 steps:
 ### 1.Generate artificial doublets from existing scRNA-seq data
 ### 2. Pre-process merged real-artificial data
 ### 3.Perform PCA and use the PC distance matrix to find each cell's proportion of artificial k nearest neighbors (pANN)
