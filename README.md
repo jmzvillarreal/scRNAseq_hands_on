@@ -20,7 +20,7 @@ NMU_O_D
 
 ### How does a sparse matrix looks like ?
 
-# Lets examine a few genes in the first thirty cells
+### Lets examine a few genes in the first thirty cells
 NMU_O_D.data[c("Upk3a", "Krt5", "Psca"), 1:30]
 
 ### Sparse matrices are a much more efficient way of storing the data
