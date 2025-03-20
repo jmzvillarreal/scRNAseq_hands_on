@@ -1,16 +1,20 @@
 # Single cell hands on Session 
 
-setwd('/home/jmartinezv/Transcriptomics_INSCIII/scRNAseq/Hands_on/')
+## Load the required packages
+
 library(Seurat)
+
 library(dplyr)
+
 library(patchwork)
+
 library(ggplot2)
 
-## Load the data ###
+## Load the data 
 
 ## Load the NMU_D dataset
 NMU_O_D.data <- Read10X(data.dir = "./NMU_O_D/")
-## Initialize the Seurat object with the raw (non-normalized data).
+### Initialize the Seurat object with the raw (non-normalized data).
 NMU_O_D <- CreateSeuratObject(counts = NMU_O_D.data, project = "NMU_O_D", min.cells = 3, min.features = 200)
 NMU_O_D
 
@@ -29,7 +33,7 @@ sparse.size
 
 ## Load the NMU_P dataset
 NMU_O_P.data <- Read10X(data.dir = "./NMU_O_P/")
-## Initialize the Seurat object with the raw (non-normalized data).
+### Initialize the Seurat object with the raw (non-normalized data).
 NMU_O_P <- CreateSeuratObject(counts = NMU_O_P.data, project = "NMU_O_P", min.cells = 3, min.features = 200)
 NMU_O_P
 
