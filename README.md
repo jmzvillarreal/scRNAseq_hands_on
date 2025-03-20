@@ -136,9 +136,6 @@ DimHeatmap(NMU_O_P, dims = 1:15, cells = 500, balanced = TRUE)
 
 # Determine the ‘dimensionality’ of the dataset 
 
-### NOTE: This process can take a long time for big datasets, comment out for expediency. More
-### approximate techniques such as those implemented in ElbowPlot() can be used to reduce
-### computation time
 NMU_O_D <- JackStraw(NMU_O_D, num.replicate = 100,dims = 30)
 
 NMU_O_D <- ScoreJackStraw(NMU_O_D, dims = 1:30)
