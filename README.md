@@ -406,8 +406,8 @@ write.table(NMU_O_integrated.markers, "NMU_O_integrated_markers.txt", sep = '\t'
 save.image(file = "scRNAseq.RData")
 ```
 
-# Leverage on the scRNAseq findings to study project them on bulk study
-# To do so we will extract cell population markers and use those as gene signatures 
+# Leverage on the scRNAseq findings to project them on bulk study
+# To do so, we will extract cell population markers and use those as gene signatures 
 
 ```r
 # Filter cell population markers by adjusted p-value (e.g., p_adj < 0.05)
