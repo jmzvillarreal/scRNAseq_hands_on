@@ -1,6 +1,6 @@
 #### Single cell hands on Session ###
 
-setwd('YOUR_PATH')
+setwd("/home/jmartinezv/Transcriptomics_INSCIII/scRNAseq/Hands_on/")
 library(Seurat)
 library(dplyr)
 library(patchwork)
@@ -359,3 +359,54 @@ NMU_O_integrated.markers <- FindAllMarkers(NMU_O_integrated, only.pos = TRUE, mi
 write.table(NMU_O_integrated.markers, "NMU_O_integrated_markers.txt", sep = '\t')
 
 save.image(file = "scRNAseq.RData")
+
+
+# Leverage on the scRNAseq findings to project them on bulk study
+# To do so we will extract cell population markers and us those as gene signaturres 
+
+## Filter cell population markers by adjusted p-value (e.g., p_adj < 0.05)
+significant_markers <- NMU_O_integrated.markers[NMU_O_integrated.markers$p_val_adj < 0.05, ]
+
+## Create a list of gene sets (significant markers per cluster)
+gene_sets <- lapply(unique(significant_markers$cluster), function(cluster_id) {
+  cluster_markers <- significant_markers[significant_markers$cluster == cluster_id, ]
+  significant_genes <- cluster_markers$gene  # All significant genes for this cluster
+  return(significant_genes)
+})
+
+names(gene_sets) <- unique(NMU_O_integrated.markers$cluster)
+
+## Convert mouse genes to human homologues
+Basal_G2M_GS <- convert_mouse_to_human_symbols(gene_sets[["Basal G2M"]], version = 1)
+Basal_GS <- convert_mouse_to_human_symbols(gene_sets[["Basal"]], version = 1)
+Intermediate_GS <- convert_mouse_to_human_symbols(gene_sets[["Intermediate"]], version = 1)
+Luminal_GS <- convert_mouse_to_human_symbols(gene_sets[["Luminal"]], version = 1)
+
+Basal_G2M_GS <- as.data.frame(Basal_G2M_GS)
+Basal_GS <- as.data.frame(Basal_GS)
+Intermediate_GS <- as.data.frame(Intermediate_GS)
+Luminal_GS <- as.data.frame(Luminal_GS)
+
+gene_sets <- list(Basal_G2M_GS$Basal_G2M_GS,Basal_GS$Basal_GS,Intermediate_GS$Intermediate_GS,Luminal_GS$Luminal_GS)
+names(gene_sets) <- unique(NMU_O_integrated.markers$cluster)
+
+## Function to remove NA values from the gene set and save as GMT
+save_as_gmt <- function(gene_sets, file_name) {
+
+  file_conn <- file(file_name, open = "w")
+  
+  for (set_name in names(gene_sets)) {
+    
+    cleaned_genes <- na.omit(gene_sets[[set_name]])
+    
+    if (length(cleaned_genes) > 0) {
+      line <- paste(set_name, "description", paste(cleaned_genes, collapse = "\t"), sep = "\t")
+      writeLines(line, file_conn)
+    }
+  }
+  
+  close(file_conn)
+}
+
+## Save the cleaned gene sets as a GMT file
+save_as_gmt(gene_sets, "NMU_O_gene_sets.gmt")
