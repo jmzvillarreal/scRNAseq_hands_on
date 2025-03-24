@@ -362,12 +362,13 @@ save.image(file = "scRNAseq.RData")
 
 
 # Leverage on the scRNAseq findings to project them on bulk study
-# To do so we will extract cell population markers and us those as gene signaturres 
+# 1. To do so we will extract cell population markers and us those as gene signatures for single sample GSEA
+## https://cloud.genepattern.org/gp/pages/index.jsf
 
-## Filter cell population markers by adjusted p-value (e.g., p_adj < 0.05)
+# Filter cell population markers by adjusted p-value (e.g., p_adj < 0.05)
 significant_markers <- NMU_O_integrated.markers[NMU_O_integrated.markers$p_val_adj < 0.05, ]
 
-## Create a list of gene sets (significant markers per cluster)
+# Create a list of gene sets (significant markers per cluster)
 gene_sets <- lapply(unique(significant_markers$cluster), function(cluster_id) {
   cluster_markers <- significant_markers[significant_markers$cluster == cluster_id, ]
   significant_genes <- cluster_markers$gene  # All significant genes for this cluster
@@ -376,7 +377,7 @@ gene_sets <- lapply(unique(significant_markers$cluster), function(cluster_id) {
 
 names(gene_sets) <- unique(NMU_O_integrated.markers$cluster)
 
-## Convert mouse genes to human homologues
+# Convert mouse genes to human 
 Basal_G2M_GS <- convert_mouse_to_human_symbols(gene_sets[["Basal G2M"]], version = 1)
 Basal_GS <- convert_mouse_to_human_symbols(gene_sets[["Basal"]], version = 1)
 Intermediate_GS <- convert_mouse_to_human_symbols(gene_sets[["Intermediate"]], version = 1)
@@ -410,3 +411,35 @@ save_as_gmt <- function(gene_sets, file_name) {
 
 ## Save the cleaned gene sets as a GMT file
 save_as_gmt(gene_sets, "NMU_O_gene_sets.gmt")
+
+# 2. Use a subset of the scRNAseq data to deconvolute cell populations in the bulk data
+## https://cibersortx.stanford.edu/
+## Extract 10 cells per population to use it for Cibersort deconvolution
+
+# Get identities
+idents <- unique(Idents(NMU_O_integrated))
+
+# Subset 10 random cells per identity class
+set.seed(123)  # For reproducibility
+subset_cells <- unlist(lapply(idents, function(ident) {
+  sample(Cells(NMU_O_integrated)[Idents(NMU_O_integrated) == ident], size = min(10, sum(Idents(NMU_O_integrated) == ident)), replace = FALSE)
+}))
+
+# Subset  object
+NMU_O_subset <- subset(NMU_O_integrated, cells = subset_cells)
+
+# Extract expression matrix
+NMU_O_expr_matrix <- as.data.frame(GetAssayData(NMU_O_subset, slot = "counts")) 
+
+# Label cell population
+colnames(NMU_O_expr_matrix) <- Idents(NMU_O_subset)
+
+# Convert mouse genes and save the subset as a matrix
+human_converted <- as.data.frame(convert_mouse_to_human_symbols(rownames(NMU_O_expr_matrix), version = 1))
+NMU_O_expr_matrix$human_converted <- human_converted$`convert_mouse_to_human_symbols(rownames(NMU_O_expr_matrix), version = 1)`
+NMU_O_expr_matrix <- na.omit(NMU_O_expr_matrix)
+NMU_O_expr_matrix <- NMU_O_expr_matrix[!duplicated(NMU_O_expr_matrix$human_converted), ]
+rownames(NMU_O_expr_matrix) <- NMU_O_expr_matrix$human_converted
+NMU_O_expr_matrix$human_converted <- NULL
+write.table(NMU_O_expr_matrix, file = "NMU_O_expr_matrix.tsv", sep = '\t',col.names = NA)
+
