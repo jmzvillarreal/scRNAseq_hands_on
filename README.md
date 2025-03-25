@@ -91,6 +91,7 @@ NMU_O_P
 ```
 
 # Normalizing the data 
+## “LogNormalize”: Feature counts for each cell are divided by the total counts for that cell and multiplied by the scale.factor.
 
 ```r
 # Log normalize
