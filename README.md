@@ -400,11 +400,18 @@ NMU_O_integrated <- RenameIdents(NMU_O_integrated, new.cluster.ids)
 # Visualize cell populations
 DimPlot(NMU_O_integrated, reduction = "umap", label = TRUE)
 
-# Calculate cell pouplation markers
+# Calculate cell popuplation markers
 NMU_O_integrated.markers <- FindAllMarkers(NMU_O_integrated, only.pos = TRUE, min.pct = 0.25, logfc.threshold = 0.25)
 write.table(NMU_O_integrated.markers, "NMU_O_integrated_markers.txt", sep = '\t')
 
 save.image(file = "scRNAseq.RData")
+```
+# Use single cell annotated populaions to create pseudobulk
+
+```r
+NMU_O_integrated$annotated_populations <- Idents(NMU_O_integrated)
+NMU_O_pseudobulk <- AggregateExpression(NMU_O_integrated,group.by = "annotated_populations")
+NMU_O_pseudobulk
 ```
 
 # Leverage on the scRNAseq findings to project them on bulk study
