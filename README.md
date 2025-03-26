@@ -406,7 +406,7 @@ write.table(NMU_O_integrated.markers, "NMU_O_integrated_markers.txt", sep = '\t'
 
 save.image(file = "scRNAseq.RData")
 ```
-# Use single cell annotated populaions to create pseudobulk
+# Use single cell annotated populations to create pseudobulk
 
 ```r
 NMU_O_integrated$annotated_populations <- Idents(NMU_O_integrated)
